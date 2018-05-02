@@ -1,0 +1,14 @@
+{
+  "name": "statusled",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "knex": "^0.14.6",
+    "node-fetch": "^2.1.2",
+    "serialport": "^6.2.0",
+    "shelljs": "^0.8.1",
+    "sqlite3": "^4.0.0"
+  }
+}
