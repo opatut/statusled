@@ -3,7 +3,7 @@ const shell = require('shelljs')
 
 const {wrapRetry} = require('./utils')
 
-const {ALL_STATUSES} = require('./constants')
+const {LED_STATES} = require('./constants')
 
 const DEVICE_PATH = '/dev/ttyACM0'
 
@@ -38,7 +38,7 @@ const write = (module.exports = wrapRetry(async status => {
   ].join(' ')
   shell.exec(stty)
 
-  const code = ALL_STATUSES.indexOf(status)
+  const code = LED_STATES[status] || 0;
   shell.exec(`echo -en '\\x0${code}' > ${DEVICE_PATH}`)
 
   console.log('set status LED to ' + status)

@@ -5,12 +5,22 @@
 #define LED_PIN 17
 #define LED_COUNT 6
 
+enum State {
+  Off = 0,
+  Red = 1,
+  Yellow = 2,
+  Green = 3,
+  Blue = 4,
+  Party = 5,
+  Police = 6,
+  Random = 7,
+
+  __count = 8,
+};
+
 Adafruit_NeoPixel leds = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ400);
 
-char buffer[255];
-int colorIndex = 2;
-const int colorCount = 7;
-int colors[] = {0, 0xFF0000, 0xDDDD00, 0x00FF00};
+State state = State::Off;
 
 void setup() {
   Serial.begin(9600);  
@@ -26,29 +36,41 @@ void setup() {
 
 void loop() {
   while (Serial.available()) {
-    colorIndex = Serial.read() % colorCount;
+    state = (State)(Serial.read() % State::__count);
   }
 
-  int color, c;
+  int color;
   
-  switch (colorIndex) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-      color = colors[colorIndex];
+  switch (state) {
+    case State::Off:
+      color = 0x000000;
       break;
-
-    case 4:
-      color = HL((millis() / 20) % 255, 1);
+      
+    case State::Red:
+      color = 0xFF0000;
       break;
-
-    case 5:
-      c = millis() / 40 % 20;
-      color = (c % 2) * (c % 10 >=8 ? 0xFFFFFF : c < 10 ? 0xFF0000 : 0x0000FF);
+      
+    case State::Yellow:
+      color = 0xDDDD00;
       break;
     
-    case 6:
+    case State::Green:
+      color = 0x00FF00;
+      break;
+      
+    case State::Blue:
+      color = 0x0000FF;
+      break;
+
+    case State::Party:
+      color = hueLightness((millis() / 20) % 255, 1);
+      break;
+
+    case State::Police:
+      color = police();
+      break;
+    
+    case State::Random:
       color = random(0, 0xFFFFFF);
       break;
   }
@@ -59,7 +81,12 @@ void loop() {
   delay(50);
 }
 
-uint32_t HL(byte h, float b) {
+uint32_t police() {
+  int c = millis() / 40 % 20;
+  return (c % 2) * (c % 10 >=8 ? 0xFFFFFF : c < 10 ? 0xFF0000 : 0x0000FF);
+}
+
+uint32_t hueLightness(byte h, float b) {
   h = 255 - h;
   if(h < 85) {
     return leds.Color((255 - h * 3) * b, 0, h * 3 * b);
