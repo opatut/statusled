@@ -1,11 +1,11 @@
-const fetch = require('node-fetch');
-const querystring = require('querystring');
+const fetch = require('node-fetch')
+const querystring = require('querystring')
 const {wrapRetry} = require('./utils')
 
-const {SLACK_ICONS, MESSAGES} = require('./constants');
+const {SLACK_ICONS, MESSAGES} = require('./constants')
 
 async function slackFetch(fn, method, body) {
-  const token = process.env.SLACK_TOKEN;
+  const token = process.env.SLACK_TOKEN
   const response = await fetch(
     'https://slack.com/api/' + fn + (method === 'get' ? '?' + querystring.stringify(body) : ''),
     {
@@ -20,13 +20,13 @@ async function slackFetch(fn, method, body) {
             body: JSON.stringify(body),
           }
         : {}),
-    },
-  );
-  const json = await response.json();
+    }
+  )
+  const json = await response.json()
   if (!json.ok) {
-    throw new Error(json.error);
+    throw new Error(json.error)
   }
-  return json;
+  return json
 }
 
 function setSlackStatus(emoji, text) {
