@@ -9,7 +9,7 @@ a sqlite database. That means I can later check how long I was in which stage.
 
 I put up this little sign next to the LED:
 
-<img src="./docs/howto.svg" style="border: 1px solid #DDD;" />
+![Howto](./docs/howto.svg)
 
 ## TODO
 
