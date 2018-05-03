@@ -1,4 +1,4 @@
-// const ALL_STATUSES = ['off', 'red', 'yellow', 'green', 'blue', 'party', 'police', 'random']
+// const ALL_STATUSES = ['off', 'red', 'yellow', 'green', 'blue', 'party', 'police', 'random', 'meeting']
 
 const SLACK_ICONS = {
   off: '',
@@ -9,7 +9,8 @@ const SLACK_ICONS = {
   party: ':parrot:',
   police: '',
   random: '',
-}
+  meeting: ':spiral_calendar_pad:',
+};
 
 const MESSAGES = {
   off: '',
@@ -20,7 +21,8 @@ const MESSAGES = {
   party: "Let's party",
   police: '',
   random: '',
-}
+  meeting: 'In a meeting',
+};
 
 const LED_STATES = {
   off: 0,
@@ -31,10 +33,11 @@ const LED_STATES = {
   party: 5,
   police: 6,
   random: 7,
-}
+  meeting: 0,
+};
 
 module.exports = {
   LED_STATES,
   SLACK_ICONS,
   MESSAGES,
-}
+};

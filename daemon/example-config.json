@@ -1,0 +1,18 @@
+{
+  "rootDir": "/home/myuser/.statusled",
+  "modules": {
+    "slack": {
+      "token": "xoxp-..."
+    },
+    "serial": {
+      "devicePath": "/dev/ttyACM0",
+      "interval": 2000
+    },
+    "sql": {
+      "filename": "log.db"
+    },
+    "file": {
+      "filename": "status"
+    }
+  }
+}
