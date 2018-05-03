@@ -3,24 +3,9 @@ const shell = require('shelljs')
 const {wrapRetry} = require('../utils')
 const {LED_STATES} = require('../constants')
 
-module.exports = options => {
-  const {interval = 2000, devicePath = '/dev/ttyACM0'} = options.modules.serial || {}
-
-  let lastStatus
-
-  fs.watchFile(
-    devicePath,
-    {
-      persistent: false,
-      interval,
-    },
-    function(stat) {
-      // ino: inode number. If non-zero, the file exists, and we can write there
-      if (stat.ino && lastStatus) {
-        write(lastStatus)
-      }
-    }
-  )
+module.exports = daemon => {
+  const interval = daemon.getConfig('modules.serial.interval', 2000)
+  const devicePath = daemon.getConfig('modules.serial.devicePath', '/dev/ttyACM0')
 
   const write = wrapRetry(async status => {
     lastStatus = status
@@ -43,5 +28,18 @@ module.exports = options => {
     console.log('set status LED to ' + status)
   }, 10000)
 
-  return write
+  fs.watchFile(
+    devicePath,
+    {
+      persistent: false,
+      interval,
+    },
+    function(stat) {
+      if (stat.ino && daemon.currentStatus) {
+        write(daemon.currentStatus)
+      }
+    }
+  )
+
+  daemon.on('status', write)
 }

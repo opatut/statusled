@@ -3,8 +3,8 @@ const querystring = require('querystring')
 const {wrapRetry} = require('../utils')
 const {SLACK_ICONS, MESSAGES} = require('../constants')
 
-module.exports = options => {
-  const token = options.modules.slack.token || process.env.SLACK_TOKEN
+module.exports = daemon => {
+  const token = daemon.getConfig('modules.slack.token', process.env.SLACK_TOKEN)
 
   async function slackFetch(fn, method, body) {
     const response = await fetch(
@@ -45,12 +45,15 @@ module.exports = options => {
     })
   }
 
-  return wrapRetry(async status => {
-    const icon = SLACK_ICONS[status] || ''
-    const message = MESSAGES[status] || ''
+  daemon.on(
+    'status',
+    wrapRetry(async status => {
+      const icon = SLACK_ICONS[status] || ''
+      const message = MESSAGES[status] || ''
 
-    await setSlackStatus(icon, message)
-    await setSlackSnooze(status == 'red' ? 30 : 0)
-    console.log(`set slack status to ${icon} / ${message}`)
-  }, 10000)
+      await setSlackStatus(icon, message)
+      await setSlackSnooze(status == 'red' ? 30 : 0)
+      console.log(`set slack status to ${icon} / ${message}`)
+    }, 10000)
+  )
 }

@@ -14,3 +14,11 @@ module.exports.wrapRetry = (fn, interval) => {
   }
   return fn2
 }
+
+module.exports.wrap = fn => async (req, res, next) => {
+  try {
+    res.json(await fn(req))
+  } catch (err) {
+    next(err)
+  }
+}
