@@ -1,24 +1,73 @@
 const Knex = require('knex')
 const path = require('path')
-const {wrap, wrapRetry} = require('../utils')
+const {wrap, wrapRetry, collect, map, pairs, mergePairs} = require('../utils')
+const _ = require('lodash')
+const moment = require('moment')
+require('moment-duration-format')(moment)
+const DURATION_THRESHOLD = 5 * 1000 // 5 seconds
 
-const getRows = knex => {
-  const today = new Date(new Date().toISOString().split('T')[0] + ' 00:00:00').getTime()
-  return knex
-    .raw(
-      `
-        SELECT
-          statuses.id AS id,
-          statuses.status AS status,
-          statuses.date AS date,
-          end.date - statuses.date AS duration
-        FROM statuses
-        LEFT OUTER JOIN statuses AS end on end.id = statuses.id + 1
-        WHERE statuses.date > ${today}
-        ORDER BY id
-      `
+const getEntries = async (knex, from, to) => {
+  const toWithNow = new Date(Math.min(new Date(), to)).getTime()
+  const raw = await knex
+    .select('*')
+    .from('statuses')
+    .where('date', '>', from)
+    .where('date', '<', to)
+    .orderBy('date')
+
+  const rawBefore = await knex
+    .select('*')
+    .from('statuses')
+    .where('date', '<', from)
+    .orderBy('date', 'desc')
+    .limit(1)
+
+  const startEntry = rawBefore[0] || {date: from, status: 'off'}
+
+  if (!raw.length || raw[0].date > from) {
+    raw.unshift(startEntry)
+  }
+
+  return collect(
+    mergePairs(
+      map(pairs(raw, true), ([row1, row2]) => {
+        const {status, date: start_} = row1
+        const start = Math.max(start_, from)
+        const end = row2 ? row2.date : toWithNow
+        const duration = end - start
+        return {status, start, end, duration}
+      }),
+      (left, right) =>
+        (left.status === right.status || right.duration < DURATION_THRESHOLD) &&
+        left.end === right.start
+          ? {
+              status: left.status,
+              start: left.start,
+              end: right.end,
+              duration: right.end - left.start,
+            }
+          : undefined
     )
-    .map(x => (x.duration == null ? {...x, duration: new Date().getTime() - x.date} : x))
+  )
+}
+
+const getStats = (rows, formatted) => {
+  const durationsByStatus = _.mapValues(_.groupBy(rows, 'status'), r => _.sum(_.map(r, 'duration')))
+
+  const allKeys = Object.keys(durationsByStatus).filter(k => k !== 'off')
+  const activeKeys = ['red', 'green', 'meeting', 'yellow']
+
+  const total = _.sum(allKeys.map(k => durationsByStatus[k] || 0))
+  const active = _.sum(activeKeys.map(k => durationsByStatus[k] || 0))
+
+  return _.mapValues(
+    {
+      ...durationsByStatus,
+      active,
+      total,
+    },
+    d => (formatted ? moment.duration(d).format('h[h]mm[m]') : d)
+  )
 }
 
 module.exports = daemon => {
@@ -33,27 +82,11 @@ module.exports = daemon => {
     app.get(
       '/stats',
       wrap(async req => {
-        const rows = await getRows(knex)
-        const durationsByStatus = _.mapValues(_.groupBy(rows, 'status'), r =>
-          _.sum(_.map(r, 'duration'))
-        )
-
-        const active = _.sum(
-          ['red', 'green', 'meeting', 'yellow'].map(k => durationsByStatus[k] || 0)
-        )
-        const total = _.sum(
-          Object.keys(durationsByStatus).map(k => (k === 'off' ? 0 : durationsByStatus[k] || 0))
-        )
-
-        const stats = _.mapValues(
-          {
-            ...durationsByStatus,
-            active,
-            total,
-          },
-          d => moment.duration(d).format('h[h]mm[m]')
-        )
-        return {today: stats, current}
+        const from = new Date(req.query.from)
+        const to = new Date(req.query.to)
+        const entries = await getEntries(knex, from, to)
+        const stats = getStats(entries, 'formatted' in req.query)
+        return {today: stats, current: daemon.currentStatus, entries}
       })
     )
   })
@@ -81,6 +114,11 @@ module.exports = daemon => {
 
   daemon.on('status', status => {
     unwrittenSqlLog.push({status, date: new Date()})
+    writeSqlLog()
+  })
+
+  daemon.on('statusWithTime', (status, date) => {
+    unwrittenSqlLog.push({status, date})
     writeSqlLog()
   })
 }

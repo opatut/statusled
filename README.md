@@ -13,5 +13,5 @@ I put up this little sign next to the LED:
 
 ## TODO
 
-* [ ] restore state from file on daemon boot
+* [x] restore state from file on daemon boot
 * [ ] detect suspends (e.g. setInterval in combination with time measurement) and store "off" into database at start of downtime
