@@ -82,8 +82,20 @@ module.exports = daemon => {
     app.get(
       '/stats',
       wrap(async req => {
-        const from = new Date(req.query.from)
-        const to = new Date(req.query.to)
+        const from = req.query.from
+          ? new Date(req.query.from)
+          : moment()
+              .startOf('day')
+              .toDate()
+              .getTime()
+
+        const to = req.query.to
+          ? new Date(req.query.to)
+          : moment()
+              .endOf('day')
+              .toDate()
+              .getTime()
+
         const entries = await getEntries(knex, from, to)
         const stats = getStats(entries, 'formatted' in req.query)
         return {today: stats, current: daemon.currentStatus, entries}
