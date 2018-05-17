@@ -9,7 +9,7 @@ module.exports = daemon => {
     next()
   })
 
-  app.get('/', (req, res) => res.send(lastStatus))
+  app.get('/', (req, res) => res.send(daemon.currentStatus))
 
   app.post('/set/:status', async (req, res) => {
     try {

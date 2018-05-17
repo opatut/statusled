@@ -4,9 +4,8 @@ const {wrap, wrapRetry, collect, map, pairs, mergePairs} = require('../utils')
 const _ = require('lodash')
 const moment = require('moment')
 require('moment-duration-format')(moment)
-const DURATION_THRESHOLD = 5 * 1000 // 5 seconds
 
-const getEntries = async (knex, from, to) => {
+const getEntries = async ({knex, from, to, durationThreshold = 5000}) => {
   const toWithNow = new Date(Math.min(new Date(), to)).getTime()
   const raw = await knex
     .select('*')
@@ -38,7 +37,7 @@ const getEntries = async (knex, from, to) => {
         return {status, start, end, duration}
       }),
       (left, right) =>
-        (left.status === right.status || right.duration < DURATION_THRESHOLD) &&
+      (left.status === right.status || right.duration < (to - from) / 1000) &&
         left.end === right.start
           ? {
               status: left.status,
@@ -83,20 +82,22 @@ module.exports = daemon => {
       '/stats',
       wrap(async req => {
         const from = req.query.from
-          ? new Date(req.query.from)
+          ? new Date(Number(req.query.from) || req.query.from)
           : moment()
               .startOf('day')
               .toDate()
               .getTime()
 
         const to = req.query.to
-          ? new Date(req.query.to)
+          ? new Date(Number(req.query.to) || req.query.to)
           : moment()
               .endOf('day')
               .toDate()
               .getTime()
 
-        const entries = await getEntries(knex, from, to)
+        const entries = await getEntries({
+          knex, from, to,
+        })
         const stats = getStats(entries, 'formatted' in req.query)
         return {today: stats, current: daemon.currentStatus, entries}
       })

@@ -1,11 +1,11 @@
-// const ALL_STATUSES = ['off', 'red', 'yellow', 'green', 'blue', 'party', 'police', 'random', 'meeting']
+// const ALL_STATUSES = ['off', 'red', 'yellow', 'green', 'break', 'party', 'police', 'random', 'meeting']
 
 const SLACK_ICONS = {
   off: '',
   red: ':red_circle:',
   yellow: ':large_orange_diamond:',
   green: ':heavy_check_mark:',
-  blue: ':double_vertical_bar:',
+  break: ':double_vertical_bar:',
   party: ':parrot:',
   police: '',
   random: '',
@@ -17,7 +17,7 @@ const MESSAGES = {
   red: 'Do not disturb',
   yellow: 'Tell me if you need me',
   green: "I'm feeling chatty",
-  blue: 'On a break',
+  break: 'On a break',
   party: "Let's party",
   police: '',
   random: '',
@@ -29,11 +29,11 @@ const LED_STATES = {
   red: 1,
   yellow: 2,
   green: 3,
-  blue: 4,
+  break: 4,
   party: 5,
   police: 6,
   random: 7,
-  meeting: 0,
+  meeting: 8,
 };
 
 module.exports = {
