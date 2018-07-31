@@ -14,8 +14,10 @@ enum State {
   Party = 5,
   Police = 6,
   Random = 7,
+  Teal = 8,
+  White = 9,
 
-  __count = 8,
+  __count = 10,
 };
 
 Adafruit_NeoPixel leds = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ400);
@@ -23,13 +25,13 @@ Adafruit_NeoPixel leds = Adafruit_NeoPixel(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ
 State state = State::Off;
 
 void setup() {
-  Serial.begin(9600);  
+  Serial.begin(9600);
 
   pinMode(VCC_PIN, OUTPUT);
   pinMode(GND_PIN, OUTPUT);
   digitalWrite(VCC_PIN, 1);
   digitalWrite(GND_PIN, 0);
-  
+
   leds.begin();
 }
 
@@ -40,27 +42,36 @@ void loop() {
   }
 
   int color;
-  
+
   switch (state) {
     case State::Off:
       color = 0x000000;
       break;
-      
+
     case State::Red:
       color = 0xFF0000;
       break;
-      
+
     case State::Yellow:
       color = 0xDDDD00;
       break;
-    
+
     case State::Green:
       color = 0x00FF00;
       break;
-      
+
     case State::Blue:
       color = 0x0000FF;
       break;
+
+    case State::Teal:
+      color = 0x008888;
+      break;
+
+    case State::White:
+      color = 0xFFFFFF;
+      break;
+
 
     case State::Party:
       color = hueLightness((millis() / 20) % 255, 1);
@@ -69,7 +80,7 @@ void loop() {
     case State::Police:
       color = police();
       break;
-    
+
     case State::Random:
       color = random(0, 0xFFFFFF);
       break;
@@ -77,7 +88,7 @@ void loop() {
 
   leds.setPixelColor(0, color);
   leds.show();
-  
+
   delay(50);
 }
 

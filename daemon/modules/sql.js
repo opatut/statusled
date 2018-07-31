@@ -54,7 +54,7 @@ const getStats = (rows, formatted) => {
   const durationsByStatus = _.mapValues(_.groupBy(rows, 'status'), r => _.sum(_.map(r, 'duration')))
 
   const allKeys = Object.keys(durationsByStatus).filter(k => k !== 'off')
-  const activeKeys = ['red', 'green', 'meeting', 'yellow']
+  const activeKeys = ['red', 'green', 'meeting', 'yellow', 'phone']
 
   const total = _.sum(allKeys.map(k => durationsByStatus[k] || 0))
   const active = _.sum(activeKeys.map(k => durationsByStatus[k] || 0))
