@@ -1,0 +1,72 @@
+.App {
+  margin: 20px;
+}
+
+.daypath {
+  margin: 100px;
+  text-align: center;
+}
+.daypath svg {
+  width: 50vh;
+  height: 50vh;
+  max-width: 90vw;
+  max-height: 90vw;
+  overflow: visible;
+}
+
+.daypath svg path {
+  fill: none;
+  stroke-width: 0.8;
+  stroke-linecap: round ;
+}
+.daypath svg path:hover {
+  stroke-width: 2;
+}
+
+.daypath svg path.empty {
+  fill: none;
+  stroke-width: 0.3;
+  stroke: #404040;
+}
+
+.day {
+  height: 40px;
+  width: 100%;
+  position: relative;
+  background: #DDD;
+}
+
+.dayEntry {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
+
+.dayEntry.status-green { background: green; }
+.dayEntry.status-red { background: red; }
+.dayEntry.status-blue { background: blue; }
+.dayEntry.status-yellow { background: #ffe73f; }
+.dayEntry.status-break { background: blue; }
+.dayEntry.status-off { background: repeating-linear-gradient( -45deg, #FFF, #FFF 10px, transparent 10px, transparent 20px); }
+.dayEntry.status-party { background: pink; }
+.dayEntry.status-meeting { background: black; }
+
+.dayLabels {
+  display: flex;
+}
+.dayLabel {
+  flex: 0 0 auto;
+  padding: 5px;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.4);
+}
+
+.dayLabel.status-green { color: green; }
+.dayLabel.status-red { color: red; }
+.dayLabel.status-blue { color: blue; }
+.dayLabel.status-yellow { color: #ffe73f; }
+.dayLabel.status-break { color: blue; }
+.dayLabel.status-off { color: #555; }
+.dayLabel.status-party { color: pink; }
+.dayLabel.status-meeting { color: black; }
